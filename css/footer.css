@@ -1,0 +1,16 @@
+#footer{
+    height: 100px;
+    background: #000;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer_item{
+    color: #FFF;
+    font-weight: bold;
+    width: 30%;
+    text-align: center;
+}
+
