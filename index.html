@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
     <head>
         <meta charset="utf-8">
         <title>clip-encoder</title>
@@ -11,133 +12,147 @@
 
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js" crossorigin="true"></script>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=ID" crossorigin="true"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+
+            gtag('config', 'ID');
+        </script>
         <script type="text/javascript" src="./js/progressbar.js"></script>
     </head>
 
-    <body>
-        <div id="header">
-            <div id="site-logo"></div>
-            <div id="site-title">Clip encoder<a href="/"></a></div>
+<body>
+    <div id="header">
+        <div id="site-logo"></div>
+        <div id="site-title">Clip encoder<a href="/"></a></div>
+    </div>
+    <div id="progress-area">
+        <div id="progress-bar">
+            <div id="progress-bar-edit" class="progress-bar-point progress-bar-point-focus"></div>
+            <div id="progress-bar-encode" class="progress-bar-point"></div>
+            <div id="progress-bar-result" class="progress-bar-point"></div>
         </div>
-        <div id="progress-area">
-            <div id="progress-bar">
-                <div id="progress-bar-edit" class="progress-bar-point progress-bar-point-focus"></div>
-                <div id="progress-bar-encode" class="progress-bar-point"></div>
-                <div id="progress-bar-result" class="progress-bar-point"></div>
-            </div>
-        </div>
-        <div id="main">
-            <div id="edit">
-                <div id="edit-contents">
-                    <div id="edit-left" class="preview">
-                        <video id="input-video-preview" controls="false" muted="" onplaying="console.log('playing');"></video>
-                        <div id="cut-slider" class="display-none">  
-                            <multi-range></multi-range>
-                        </div> 
-                        <div id="message" class="display-none">
-                            <div id="message-flex">
-                                <div id="message-logo"></div>
-                                <div id="message-text"></div>
-                            </div>
-                        </div>
+    </div>
+    <div id="main">
+        <div id="edit">
+            <div id="edit-contents">
+                <div id="edit-left" class="preview">
+                    <video id="input-video-preview" controls="false" muted=""
+                        onplaying="console.log('playing');"></video>
+                    <div id="cut-slider" class="display-none">
+                        <multi-range></multi-range>
                     </div>
-                    <div id="edit-right">
-                        <div id="step-1" class="step">
-                            <div class="step-icon"></div>
-                            <div class="step-contents">
-                                <div id="drag-area" class="drag-area-init">
-                                    <div class="drop-info">ファイルをドロップ</div>
-                                    <div class="drop-or">または</div>   
-                                    <input id="uploader" type="file">
-                                </div>  
-                            </div>
-                        </div>
-                        <div id="step-2" class="step">
-                            <div class="step-icon"></div>
-                            <div class="step-contents">
-                                <div class="clip-area">
-                                    <div class="clip-title">開始位置</div>
-                                    <div class="clip-input-area">
-                                        <input type="text" id="start_time" class="clip-input" minlength="1" maxlength="11" value="00:00:00.00" placeholder="00:00:00.00" size="8">
-                                    </div>
-                                </div>
-                                <div class="clip-area">
-                                    <div class="clip-title">終了位置</div>
-                                    <div class="clip-input-area">
-                                        <input type="text" id="stop_time" class="clip-input" minlength="1" maxlength="11" value="00:00:00.00" placeholder="00:00:00.00" size="8">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="step-3" class="step">
-                            <div class="step-icon"></div>
-                            <div class="step-contents">
-                                <div class="config-area">
-                                    <div class="config-title">解像度</div>
-                                    <div class="config-input-area">
-                                        <select id='resolution' class="config-input">
-                                            <option value="auto" selected>auto</option>
-                                            <option value="1920×1080">1920×1080</option>
-                                            <option value="1280x720">1280x720</option>
-                                            <option value="1024x576">1024x576</option>
-                                            <option value="640×480">640×480</option>
-                                            <option value="480×272">480×272</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="config-area">
-                                    <div class="config-long-title">フレームレート</div>
-                                    <div class="config-input-area units">
-                                        <input type="number" id="framerate" class="config-input" value="30" max="60" min="10">
-                                    </div>
-                                    <span>fps</span>
-                                </div>
-                                <div class="config-area">
-                                    <div class="config-long-title">目標ファイルサイズ</div>
-                                    <div id="filesize-area" class="config-input-area units">
-                                        <input type="number" id="filesize" class="config-input" value="8" min="0">
-                                    </div>
-                                    <span>MB</span>
-                                </div>
-                                <div class="config-area">
-                                    <div class="config-long-title">映像ビットレート</div>
-                                    <div class="config-input-area units">
-                                        <input type="number" id="bitrate" class="config-input" placeholder="auto" min="0">
-                                    </div>
-                                    <span>Kbps</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="start-encode">エンコード開始</div>
-                    </div>
-                </div>
-            </div>
-            <div id="encode" class="display-none">
-                <div id="encode-contents">
-                    <div id="encode-progress-area">
-                        <div id="encode-title">エンコード中</div>
-                        <div id="encodebar"></div>
-                        <div id="encode-percent">0</div>
-                    </div>
-                </div>
-            </div>
-            <div id="result" class="display-none">
-                <div id="result-contents">
-                    <div class="output-preview-area">
-                        <video id="output-video-preview" controls="" muted="" autoplay=""></video>
-                        <div id="re-edit" class="button">再編集</div>
-                        <div id="video-download-button" class="button">
-                            ダウンロード
-                            <a id="a_download"></a>
+                    <div id="message" class="display-none">
+                        <div id="message-flex">
+                            <div id="message-logo"></div>
+                            <div id="message-text"></div>
                         </div>
                     </div>
                 </div>
+                <div id="edit-right">
+                    <div id="step-1" class="step">
+                        <div class="step-icon"></div>
+                        <div class="step-contents">
+                            <div id="drag-area" class="drag-area-init">
+                                <div class="drop-info">ファイルをドロップ</div>
+                                <div class="drop-or">または</div>
+                                <input id="uploader" type="file">
+                            </div>
+                        </div>
+                    </div>
+                    <div id="step-2" class="step">
+                        <div class="step-icon"></div>
+                        <div class="step-contents">
+                            <div class="clip-area">
+                                <div class="clip-title">開始位置</div>
+                                <div class="clip-input-area">
+                                    <input type="text" id="start_time" class="clip-input" minlength="1" maxlength="11"
+                                        value="00:00:00.00" placeholder="00:00:00.00" size="8">
+                                </div>
+                            </div>
+                            <div class="clip-area">
+                                <div class="clip-title">終了位置</div>
+                                <div class="clip-input-area">
+                                    <input type="text" id="stop_time" class="clip-input" minlength="1" maxlength="11"
+                                        value="00:00:00.00" placeholder="00:00:00.00" size="8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="step-3" class="step">
+                        <div class="step-icon"></div>
+                        <div class="step-contents">
+                            <div class="config-area">
+                                <div class="config-title">解像度</div>
+                                <div class="config-input-area">
+                                    <select id='resolution' class="config-input">
+                                        <option value="auto" selected>auto</option>
+                                        <option value="1920×1080">1920×1080</option>
+                                        <option value="1280x720">1280x720</option>
+                                        <option value="1024x576">1024x576</option>
+                                        <option value="640×480">640×480</option>
+                                        <option value="480×272">480×272</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="config-area">
+                                <div class="config-long-title">フレームレート</div>
+                                <div class="config-input-area units">
+                                    <input type="number" id="framerate" class="config-input" value="30" max="60"
+                                        min="10">
+                                </div>
+                                <span>fps</span>
+                            </div>
+                            <div class="config-area">
+                                <div class="config-long-title">目標ファイルサイズ</div>
+                                <div id="filesize-area" class="config-input-area units">
+                                    <input type="number" id="filesize" class="config-input" value="8" min="0">
+                                </div>
+                                <span>MB</span>
+                            </div>
+                            <div class="config-area">
+                                <div class="config-long-title">映像ビットレート</div>
+                                <div class="config-input-area units">
+                                    <input type="number" id="bitrate" class="config-input" placeholder="auto" min="0">
+                                </div>
+                                <span>Kbps</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="start-encode">エンコード開始</div>
+                </div>
             </div>
         </div>
-        <script type="text/javascript" src="./js/control.js"></script>
-        <script type="text/javascript" src="./js/multi-range.js"></script>
-        <script type="text/javascript" src="./js/progressbar-control.js"></script>
-        <script type="text/javascript" src="./js/video-load.js"></script>
-        <script type="text/javascript" src="./js/page-control.js"></script>
-    </body>
+        <div id="encode" class="display-none">
+            <div id="encode-contents">
+                <div id="encode-progress-area">
+                    <div id="encode-title">エンコード中</div>
+                    <div id="encodebar"></div>
+                    <div id="encode-percent">0</div>
+                </div>
+            </div>
+        </div>
+        <div id="result" class="display-none">
+            <div id="result-contents">
+                <div class="output-preview-area">
+                    <video id="output-video-preview" controls="" muted="" autoplay=""></video>
+                    <div id="re-edit" class="button">再編集</div>
+                    <div id="video-download-button" class="button">
+                        ダウンロード
+                        <a id="a_download"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="./js/control.js"></script>
+    <script type="text/javascript" src="./js/multi-range.js"></script>
+    <script type="text/javascript" src="./js/progressbar-control.js"></script>
+    <script type="text/javascript" src="./js/video-load.js"></script>
+    <script type="text/javascript" src="./js/page-control.js"></script>
+</body>
+
 </html>
