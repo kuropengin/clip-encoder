@@ -206,12 +206,10 @@ async function encode() {
         await fetchFile(input_video_file)
     );
     start_encode_time = new Date().getTime();
-    const _start = document.getElementById("start_time").value;
-    const _stop = document.getElementById("stop_time").value;
     if (do_encode) {
         await ffmpeg.run(
-            '-ss', "" + _start,
-            '-to', "" + _stop,
+            '-ss', "" + start_video_time,
+            '-to', "" + stop_video_time,
             '-i', input_video_file_name,
             '-s', resolution,
             '-b:v', video_bitrate + 'k',
@@ -223,8 +221,8 @@ async function encode() {
 
     } else {
         await ffmpeg.run(
-            '-ss', "" + _start,
-            '-to', "" + _stop,
+            '-ss', "" + start_video_time,
+            '-to', "" + stop_video_time,
             '-i', input_video_file_name,
             '-vcodec', 'copy',
             '-acodec', 'copy',
