@@ -22,8 +22,6 @@ fileArea.addEventListener('drop', function(e){
     var file = files[0];
     if(typeof e.dataTransfer.files[0] !== 'undefined') {
         if(file.type.match("video.*") || file.type.match("image.gif")){
-            const mr = document.querySelector("multi-range");
-            mr.value = "0,100"; 
             cutRange.classList.remove('display-none');
             error_display_off();
         }
@@ -47,9 +45,7 @@ fileInput.addEventListener('change', function(e){
     var file = e.target.files[0];
     
     if(typeof e.target.files[0] !== 'undefined') {
-        if(file.type.match("video.*") || file.type.match("image.gif")){
-            const mr = document.querySelector("multi-range");
-            mr.value = "0,100"; 
+        if(file.type.match("video.*") || file.type.match("image.gif")){ 
             cutRange.classList.remove('display-none');
             error_display_off();
         }

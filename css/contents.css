@@ -143,14 +143,6 @@ main::-webkit-scrollbar {
     background: #333;
 }
 
-#cut-slider{
-    width: 100%;
-    margin: 0 auto;
-    margin-bottom: 20px;
-    padding-bottom: 25px;
-    background: #FFF;
-    box-shadow: 2px 2px 4px grey;
-}
 
 #message{
     width: 100%;

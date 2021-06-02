@@ -1,162 +1,3 @@
-customElements.define("multi-range", class extends HTMLElement {
-    connectedCallback() {
-        if (this.shadowRoot) return
-        
-        this.attachShadow({mode: "open"}).innerHTML = `
-            <style>
-                :host {
-                    display: inline-block;
-                    width: 100%;
-                    --line-inactive: #ddd;
-                    --line-active: #78b551;
-                    --thumb: #78b551;
-                }
-                input[type="range"] {
-                    width: calc(100% - 20px);
-                    height: 10px;
-                    cursor: pointer;
-                    outline: none;
-                    -webkit-appearance: none;
-                }
-                input[type="range"]::-webkit-slider-runnable-track {
-                    height: 10px;
-                }
-                input[type="range"]::-webkit-slider-thumb {
-                    height: 30px;
-                    width: 15px;
-                    margin-top: -10px;
-                    background: var(--thumb);
-                    border-radius: 10px;
-                    box-shadow: 0 0 5px 0 #0003;
-                    -webkit-appearance: none;
-                }
-
-                input[type="range" i]{
-                    margin: 2px 10px;
-                }
-                
-                .container {
-                    width: 100%;
-                    position: relative;
-                }
-                #back, #front {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                }
-                #back::-webkit-slider-thumb,
-                #front::-webkit-slider-thumb {
-                    position: relative;
-                    z-index: 1;
-                }
-                #back::-webkit-slider-runnable-track {
-                    background: linear-gradient(to right, var(--line-inactive) 0% var(--min),
-                        var(--line-active) var(--min) var(--max),
-                        var(--line-inactive) var(--max) 100%);
-                }
-                #front,
-                #front::-webkit-slider-runnable-track {
-                    background: transparent;
-                }
-            </style>
-
-            <div class="container">
-                <input id="back" type="range" min="0" max="100" value="0" step="1"/>
-                <input id="front" type="range" min="0" max="100" value="100" step="1"/>
-            </div>
-        `
-        
-        this._elems = {
-            back: this.shadowRoot.getElementById("back"),
-            front: this.shadowRoot.getElementById("front"),
-        }
-        
-        this._elems.back.addEventListener("input", () => { this._redraw() })
-        this._elems.front.addEventListener("input", () => { this._redraw() })
-        this._redraw()
-    }
-    
-    _redraw() {
-        const { min, max, from, to } = this
-        const x = (from - min) / (max - min) * 100
-        const y = (to - min) / (max - min) * 100
-
-        this._elems.back.style.setProperty("--min", x + "%")
-        this._elems.back.style.setProperty("--max", y + "%")
-    }
-    
-    get min() {
-        return this._elems.back.min
-    }
-    
-    set min(value) {
-        const [min, max] = [+value || 0, this.max].sort((a, b) => a - b)
-        this._elems.back.min = min
-        this._elems.back.max = max
-        this._elems.front.min = min
-        this._elems.front.max = max
-        this._redraw()
-    }
-    
-    get max() {
-        return this._elems.back.max
-    }
-    
-    set max(value) {
-        const [min, max] = [this.min, +value || 0].sort((a, b) => a - b)
-        this._elems.back.min = min
-        this._elems.back.max = max
-        this._elems.front.min = min
-        this._elems.front.max = max
-        this._redraw()
-    }
-    
-    get from() {
-        return Math.min(this._elems.back.value, this._elems.front.value)
-    }
-    
-    set from(value) {
-        const [min, max] = [+value || 0, this.to].sort((a, b) => a - b)
-        this._elems.back.value = min
-        this._elems.front.value = max
-        this._redraw()
-    }
-    
-    get to() {
-        return Math.max(this._elems.back.value, this._elems.front.value)
-    }
-    
-    set to(value) {
-        const [min, max] = [this.from, +value || 0].sort((a, b) => a - b)
-        this._elems.back.value = min
-        this._elems.front.value = max
-        this._redraw()
-    }
-    
-    get value() {
-        return [this._elems.back.value, this._elems.front.value].sort((a, b) => a - b).join(",")
-    }
-    
-    set value(value) {
-        const [min, max] = value.split(",").slice(0, 2).sort((a, b) => a - b)
-        this._elems.back.value = min
-        this._elems.front.value = max
-        this._redraw()
-    }
-
-    set step(value) {
-        this._elems.back.step = value
-        this._elems.front.step = value
-    }
-
-    get step() {
-        return Math.max(this._elems.back.step, this._elems.front.step)
-    }
-})
-
-var mr = document.querySelector("multi-range");
-var v_min = mr.from; 
-var v_max = mr.to;
 
 const v = document.getElementById('input-video-preview');
 
@@ -164,18 +5,77 @@ const start_time = document.getElementById('start_time');
 const stop_time = document.getElementById('stop_time');
 
 
+const start_range = document.getElementById('start-range');
+const stop_range = document.getElementById('stop-range');
+
+var v_min = 0;
+var v_max = 100;
+
+function change_start_range(){
+    this.value=Math.min(this.value,this.parentNode.childNodes[5].value-1);
+    var value=(100/(parseFloat(this.max)-parseInt(this.min)))*parseFloat(this.value)-(100/(parseFloat(this.max)-parseInt(this.min)))*parseFloat(this.min);
+    var children = this.parentNode.childNodes[1].childNodes;
+    children[1].style.width=value+'%';
+    children[5].style.left=value+'%';
+    children[7].style.left=value+'%';
+}
+
+function change_stop_range(){
+    this.value=Math.max(this.value,this.parentNode.childNodes[3].value-(-1));
+    var value=(100/(parseFloat(this.max)-parseInt(this.min)))*parseFloat(this.value)-(100/(parseFloat(this.max)-parseInt(this.min)))*parseFloat(this.min);
+    var children = this.parentNode.childNodes[1].childNodes;
+    children[3].style.width=(100-value)+'%';
+    children[5].style.right=(100-value)+'%';
+    children[9].style.left=value+'%';
+}
+
+start_range.addEventListener('input', change_start_range);
+stop_range.addEventListener('input', change_stop_range);
+start_range.addEventListener('input', change_multi_range);
+stop_range.addEventListener('input', change_multi_range);
+
+
+function set_value_multi_range(set_min,set_max){
+    var set_value = Math.min(set_min,set_max);
+    start_range.value = set_value;
+    var children = start_range.parentNode.childNodes[1].childNodes;
+    children[1].style.width=set_value+'%';
+    children[5].style.left=set_value+'%';
+    children[7].style.left=set_value+'%';
+
+    v_min = set_value;
+
+
+    set_value = Math.max(set_min,set_max);
+    stop_range.value = set_value;
+    children = stop_range.parentNode.childNodes[1].childNodes;
+    children[3].style.width=(100-set_value)+'%';
+    children[5].style.right=(100-set_value)+'%';
+    children[9].style.left=set_value+'%';
+
+    v_max = set_value;
+
+}
+
+
+function set_step_multi_range(set_step){
+    start_range.step = set_step;
+    stop_range.step = set_step;
+}
+
+
 
 function change_multi_range() {
-    if(v_min != mr.from){
-        v.currentTime = v.duration * (mr.from / 100);
+    if(v_min != start_range.value){
+        v.currentTime = v.duration * (start_range.value / 100);
     }
     else{
-        v.currentTime = v.duration * (mr.to / 100);
+        v.currentTime = v.duration * (stop_range.value / 100);
     }
-	v_min = mr.from; 
-    v_max = mr.to;
+	v_min = start_range.value; 
+    v_max = stop_range.value;
 
-    var inSec = v.duration * (mr.from / 100);
+    var inSec = v.duration * (start_range.value / 100);
     if(String(inSec).indexOf( '.' ) != -1){
         var tmsec = (String(inSec).split(".")[1] + "000");
         var msec = ("0" + Math.round(tmsec.slice(0, 2) + "." + tmsec.slice(2))).slice(-2);
@@ -192,7 +92,7 @@ function change_multi_range() {
     start_time.value = hour + ":" + min + ":" + sec + "." + msec;
 
 
-    inSec = v.duration * (mr.to / 100);
+    inSec = v.duration * (stop_range.value / 100);
     inSec = Math.round(inSec * 1000) / 1000;
     if(String(inSec).indexOf( '.' ) != -1){
         var tmsec = (String(inSec).split(".")[1] + "000");
@@ -207,6 +107,7 @@ function change_multi_range() {
     //document.getElementById('stop_time').value = min + ":" + sec + ":" + con;
     stop_time.value = hour + ":" + min + ":" + sec + "." + msec;
 
+    get_encode_setting();
 }
 
 function change_start_stop_time(){
@@ -216,8 +117,7 @@ function change_start_stop_time(){
 
     var tatime = "";
     if(this.id == "start_time"){
-        tatime = stop_time.value.split(":");
-        
+        tatime = stop_time.value.split(":"); 
     }
     else{
         tatime = start_time.value.split(":");
@@ -238,7 +138,10 @@ function change_start_stop_time(){
 
     var up_percent = (rtime / v.duration) * 100;
     if(up_percent <= 100){
-        mr.value = ((atime / v.duration) * 100) + "," + up_percent;
+        set_value_multi_range(((atime / v.duration) * 100),up_percent);
+    }
+    else{
+        set_value_multi_range(100,up_percent);
     }
 
     change_multi_range();
@@ -248,6 +151,5 @@ function change_start_stop_time(){
 
 }
 
-mr.addEventListener('input', change_multi_range);
 start_time.addEventListener('change', change_start_stop_time);
 stop_time.addEventListener('change', change_start_stop_time);
