@@ -28,11 +28,12 @@ async function show_input_video_preview(input_video_file) {
     await sleep(1000);
     input_video_time = input_video_preview.duration;
 
-    var mr = document.querySelector("multi-range");
-    mr.step = 100 / (input_video_time * 100);
+    set_value_multi_range(0, 100);
+    set_step_multi_range(100 / (input_video_time * 100));
     console.log(input_video_time);
-    change_multi_range();
-
+    if (input_video_time) {
+        change_multi_range();
+    }
     input_video_preview.currentTime = 0;
 }
 
@@ -106,6 +107,7 @@ function get_encode_setting() {
     start_video_time = parseInt(_start[0]) * 360 + parseInt(_start[1]) * 60 + parseFloat(_start[2]) + parseFloat(_start[3]) / 100;
     stop_video_time = parseInt(_stop[0]) * 360 + parseInt(_stop[1]) * 60 + parseFloat(_stop[2]) + parseFloat(_stop[3]) / 100;
     output_video_time = stop_video_time - start_video_time;
+
 
     let _message = "";
     config_check = false;
@@ -252,12 +254,13 @@ document.getElementById('start_time').addEventListener('change', get_encode_sett
 document.getElementById('stop_time').addEventListener('change', get_encode_setting);
 document.getElementById('start-encode').addEventListener('click', encode);
 
-
+const video_area = document.getElementById('video-area');
 input_video_preview.controls = false;
-input_video_preview.addEventListener("mouseover", function (event) {
+video_area.addEventListener("mouseover", function (event) {
     input_video_preview.controls = true;
 });
 
-input_video_preview.addEventListener("mouseout", function (event) {
+
+video_area.addEventListener("mouseout", function (event) {
     input_video_preview.controls = false;
 });

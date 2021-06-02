@@ -9,6 +9,7 @@
         <link type="text/css" rel="stylesheet" href="./css/header.css">
         <link type="text/css" rel="stylesheet" href="./css/footer.css">
         <link type="text/css" rel="stylesheet" href="./css/progressbar.css">
+        <link type="text/css" rel="stylesheet" href="./css/multi-range.css">
 
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.10.0/dist/ffmpeg.min.js" crossorigin="true"></script>
@@ -40,10 +41,23 @@
         <div id="edit">
             <div id="edit-contents">
                 <div id="edit-left" class="preview">
-                    <video id="input-video-preview" controls="false" muted=""
-                        onplaying="console.log('playing');"></video>
+                    <div id="video-area">
+                        <video id="input-video-preview" controls="false" muted=""onplaying="console.log('playing');"></video>
+                    </div>
                     <div id="cut-slider" class="display-none">
-                        <multi-range></multi-range>
+                        <div slider id="slider-distance">
+                            <div>
+                              <div inverse-left style="width:0%;"></div>
+                              <div inverse-right style="width:0%;"></div>
+                              <div range style="left:0%;right:0%;"></div>
+                              <span thumb style="left:0%;"></span>
+                              <span thumb style="left:100%;"></span>
+                              
+                            </div>
+                            <input id="start-range" type="range" tabindex="0" value="0" max="100" min="0" step="1"/>
+                            <input id="stop-range" type="range" tabindex="0" value="100" max="100" min="0" step="1"/>
+                        </div>
+
                     </div>
                     <div id="message" class="display-none">
                         <div id="message-flex">
