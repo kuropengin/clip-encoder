@@ -8,8 +8,9 @@ var output_video_time = null;
 var start_video_time = null;
 var stop_video_time = null;
 var resolution = null;
-var file_size =null;
-var bitrate = null;
+var file_size = null;
+var video_bitrate = null;
+var audio_bitrate = null;
 var framerate = null;
 var start_encode_time = null;
 
@@ -27,10 +28,10 @@ async function load_video({ target: { files } }) {
     );
     await sleep(1000);
     input_video_time = input_video_preview.duration;
-    
+
     var mr = document.querySelector("multi-range");
     mr.step = 100 / (input_video_time * 100);
-    console.log(input_video_time );
+    console.log(input_video_time);
     change_multi_range();
 
     input_video_preview.currentTime = 0;
@@ -47,10 +48,10 @@ async function drop_load_video({ dataTransfer: { files } }) {
     );
     await sleep(1000);
     input_video_time = input_video_preview.duration;
-    
+
     var mr = document.querySelector("multi-range");
     mr.step = 100 / (input_video_time * 100);
-    console.log(input_video_time );
+    console.log(input_video_time);
     change_multi_range();
 
     input_video_preview.currentTime = 0;
@@ -62,7 +63,7 @@ async function drop_load_video({ dataTransfer: { files } }) {
 const { createFFmpeg, fetchFile } = FFmpeg;
 const ffmpeg = createFFmpeg({
     log: false,
-    logger:log => show_log(log),
+    logger: log => show_log(log),
 });
 
 
@@ -70,21 +71,22 @@ const ffmpeg = createFFmpeg({
 
 
 function show_log(log) {
-    let temp= log["message"];
-    let frame =null;
-    if ( temp.indexOf("frame") != -1  && temp.indexOf("fps") != -1 && temp.indexOf("speed") != -1){
-        frame = parseInt(temp.replace(/(\s|&nbsp;)+/g," ").split(" ")[1]);
-        let progress = parseInt((frame/Math.ceil(output_video_time*framerate))*100);
-        bar.animate(progress/100);
+    let temp = log["message"];
+    let frame = null;
+    if (temp.indexOf("frame") != -1 && temp.indexOf("fps") != -1 && temp.indexOf("speed") != -1) {
+        frame = parseInt(temp.replace(/(\s|&nbsp;)+/g, " ").split(" ")[1]);
+        let progress = parseInt((frame / Math.ceil(output_video_time * framerate)) * 100);
+        bar.animate(progress / 100);
         document.getElementById('encode-percent').textContent = progress;
     }
-    
-    
+    //console.log(log);
+
+
 }
-function calculation_remaining_time(progress){
+function calculation_remaining_time(progress) {
     let elapsed_time = new Date().getTime() - start_encode_time;
-    elapsed_time = elapsed_time /1000;
-    return (elapsed_time/progress)*(100-progress)
+    elapsed_time = elapsed_time / 1000;
+    return (elapsed_time / progress) * (100 - progress)
 }
 
 function calculation_resolution(bitrate) {
@@ -112,7 +114,7 @@ function calculation_bitrate(file_size, video_time) {
 }
 
 function get_encode_setting() {
-    let temp = null;
+
     const _start = document.getElementById("start_time").value.split(":");
     const _stop = document.getElementById("stop_time").value.split(":");
     start_video_time = parseInt(_start[0] * 60 * 60) + parseInt(_start[1] * 60) + parseFloat(_start[2]);
@@ -147,20 +149,35 @@ function get_encode_setting() {
         error_display_off();
     }
     //ビットレート計算
-    filesize = parseFloat(document.getElementById("filesize").value);   
-    temp =document.getElementById("bitrate").value;
-    if (temp=="auto" || temp==""){
-        bitrate = calculation_bitrate(filesize,output_video_time);
-    }else{
-        bitrate = parseInt(document.getElementById("bitrate").value);
+    let temp = null;
+
+    //ファイルサイズ取得
+    filesize = parseFloat(document.getElementById("filesize").value);
+
+    //音声ビットレート取得
+    temp = document.getElementById("audio-bitrate").value;
+    if (temp == "auto" || temp == "" || temp == "0") {
+        audio_bitrate = 64;
+    } else {
+        audio_bitrate = parseInt(temp);
     }
+
+    //映像ビットレート計算
+    temp = document.getElementById("video-bitrate").value;
+    if (temp == "auto" || temp == "" || temp == "0") {
+        video_bitrate = calculation_bitrate(filesize, output_video_time) - audio_bitrate;
+    } else {
+        video_bitrate = parseInt(temp);
+    }
+
     //解像度計算
-    temp =  document.getElementById("resolution").value;
-    if (temp=="auto"){
-        resolution = calculation_resolution(bitrate);
-    }else{
+    temp = document.getElementById("resolution").value;
+    if (temp == "auto") {
+        resolution = calculation_resolution(video_bitrate);
+    } else {
         resolution = temp;
     }
+
     //フレームレート読み込み
     framerate = parseInt(document.getElementById("framerate").value);
     console.log(_message);
@@ -190,13 +207,13 @@ async function encode() {
         '-to', "" + stop_video_time,
         '-i', input_video_file_name,
         '-s', resolution,
-        '-b:v', bitrate+"k",
-        '-bufsize', (file_size+1)+'M',
-        '-ab', '64k',
+        '-b:v', video_bitrate + 'k',
+        '-bufsize', (file_size + 1) + 'M',
+        '-ab', audio_bitrate + 'k',
         '-vf', 'framerate=' + framerate,
         'output.mp4'
     );
-    start_encode_time =null;
+    start_encode_time = null;
     console.log('エンコードが完了しました。「エンコード済みの動画」を確認してください');
     const data = ffmpeg.FS('readFile', 'output.mp4');
     let output_blob = new Blob([data.buffer], { type: 'video/mp4' });
