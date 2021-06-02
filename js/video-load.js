@@ -15,6 +15,37 @@ var framerate = null;
 var start_encode_time = null;
 var do_encode = true;
 
+let preset_list = {
+    "Discord(8MB)": {
+        "file_size": 8,
+        "max_framerate": 60,
+        "max_video_bitrate": Infinity,
+        "max_audio_bitrate": 128,
+        "max_video_time": Infinity
+    },
+    "Discord(100MB)": {
+        "file_size": 100,
+        "max_framerate": 60,
+        "max_video_bitrate": Infinity,
+        "max_audio_bitrate": 320,
+        "max_video_time": Infinity
+    },
+    "Twitter": {
+        "file_size": 512,
+        "max_framerate": 40,
+        "max_video_bitrate": 25 * 1000,
+        "max_audio_bitrate": 320,
+        "max_video_time": 140
+    }
+};
+
+function get_preset_list() {
+    return Object.keys(preset_list);
+}
+function get_preset(key) {
+    return preset_list[key]
+}
+
 
 
 async function show_input_video_preview(input_video_file) {
@@ -136,55 +167,65 @@ function get_encode_setting() {
         config_check = true;
         error_display_off();
     }
-    //ビットレート計算
-    let temp = null;
-
+    //共通部分
     //ファイルサイズ取得
     filesize = parseFloat(document.getElementById("filesize").value);
 
-    //音声ビットレート取得
-    temp = document.getElementById("audio-bitrate").value;
-    if (temp == "auto" || temp == "" || temp == "0") {
-        audio_bitrate = 64;
-    } else {
-        audio_bitrate = parseInt(temp);
-    }
-
-    //映像ビットレート計算
-    temp = document.getElementById("video-bitrate").value;
-    if (temp == "auto" || temp == "" || temp == "0") {
+    if (false) {
+        //プリセットが選択された場合
+        let preset_name = "Discord(8MB)";
+        let preset = get_preset(preset_name);
+        //音声ビットレート取得
+        audio_bitrate = preset["max_audio_bitrate"];
+        //映像ビットレート計算
         video_bitrate = calculation_bitrate(filesize, output_video_time) - audio_bitrate;
-    } else {
-        video_bitrate = parseInt(temp);
-    }
-
-    //解像度計算
-    temp = document.getElementById("resolution").value;
-    if (temp == "auto") {
+        //解像度計算
         resolution = calculation_resolution(video_bitrate);
-    } else {
-        resolution = temp;
-    }
-    //フレームレート読み込み
-    framerate = parseInt(document.getElementById("framerate").value);
-    //エンコードをするか？
-    temp = ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time;
-    if (document.getElementById("do-encode").value == "true") {
+        //フレームレート
+        framerate = 30;
+        //エンコードをするか？
         do_encode = true;
-        document.getElementById("predicted_filesize").value = "エンコードをしない場合に表示";
-
     } else {
-        do_encode = false;
-        document.getElementById("predicted_filesize").value = temp;
+        //詳細設定モード
+        //ビットレート計算
+        let temp = null;
+        //音声ビットレート取得
+        temp = document.getElementById("audio-bitrate").value;
+        if (temp == "auto" || temp == "" || temp == "0") {
+            audio_bitrate = 64;
+        } else {
+            audio_bitrate = parseInt(temp);
+        }
+
+        //映像ビットレート計算
+        temp = document.getElementById("video-bitrate").value;
+        if (temp == "auto" || temp == "" || temp == "0") {
+            video_bitrate = calculation_bitrate(filesize, output_video_time) - audio_bitrate;
+        } else {
+            video_bitrate = parseInt(temp);
+        }
+
+        //解像度計算
+        temp = document.getElementById("resolution").value;
+        if (temp == "auto") {
+            resolution = calculation_resolution(video_bitrate);
+        } else {
+            resolution = temp;
+        }
+        //フレームレート読み込み
+        framerate = parseInt(document.getElementById("framerate").value);
+        //エンコードをするか？
+        temp = ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time;
+        if (document.getElementById("do-encode").value == "true") {
+            do_encode = true;
+            document.getElementById("predicted_filesize").value = "エンコードをしない場合に表示";
+
+        } else {
+            do_encode = false;
+            document.getElementById("predicted_filesize").value = temp;
+        }
     }
 
-
-
-    //エンコード無し時のファイルサイズ計算
-    //console.log("推定ファイルサイズ:", ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time);
-
-
-    //console.log(_message);
 }
 
 
