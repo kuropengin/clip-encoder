@@ -16,11 +16,7 @@ var start_encode_time = null;
 var do_encode = true;
 
 
-
-
-
-async function load_video({ target: { files } }) {
-    input_video_file = files;
+async function show_input_video_preview(input_video_file) {
     input_video_preview.src = URL.createObjectURL(
         new Blob(
             [input_video_file[0]],
@@ -36,29 +32,19 @@ async function load_video({ target: { files } }) {
     change_multi_range();
 
     input_video_preview.currentTime = 0;
+}
+
+
+async function load_video({ target: { files } }) {
+    input_video_file = files;
+    await show_input_video_preview(input_video_file);
 }
 
 
 async function drop_load_video({ dataTransfer: { files } }) {
     input_video_file = files;
-    input_video_preview.src = URL.createObjectURL(
-        new Blob(
-            [input_video_file[0]],
-            { type: 'video/mp4' }
-        )
-    );
-    await sleep(1000);
-    input_video_time = input_video_preview.duration;
-
-    var mr = document.querySelector("multi-range");
-    mr.step = 100 / (input_video_time * 100);
-    console.log(input_video_time);
-    change_multi_range();
-
-    input_video_preview.currentTime = 0;
+    await show_input_video_preview(input_video_file);
 }
-
-
 
 
 const { createFFmpeg, fetchFile } = FFmpeg;
@@ -66,9 +52,6 @@ const ffmpeg = createFFmpeg({
     log: false,
     logger: log => show_log(log),
 });
-
-
-
 
 
 function show_log(log) {
