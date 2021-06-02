@@ -166,12 +166,17 @@ function get_encode_setting() {
     //フレームレート読み込み
     framerate = parseInt(document.getElementById("framerate").value);
     //エンコードをするか？
-    temp = document.getElementById("do-encode").value;
-    if (temp == "true") {
+    temp = ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time;
+    if (document.getElementById("do-encode").value == "true") {
         do_encode = true;
+        document.getElementById("predicted_filesize").value = "エンコードをしない場合に表示";
+
     } else {
         do_encode = false;
+        document.getElementById("predicted_filesize").value = temp;
     }
+
+
 
     //エンコード無し時のファイルサイズ計算
     //console.log("推定ファイルサイズ:", ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time);

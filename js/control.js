@@ -93,6 +93,7 @@ elm_do_encode.addEventListener('change', function () {
         document.getElementById('filesize').readOnly = false;
         document.getElementById('video-bitrate').readOnly = false;
         document.getElementById('audio-bitrate').readOnly = false;
+        document.getElementById("predicted_filesize").value = "エンコードをしない場合に表示";
     }
     else {
         document.getElementById('resolution').classList.add('input-readonly');
@@ -107,7 +108,7 @@ elm_do_encode.addEventListener('change', function () {
         document.getElementById('filesize').readOnly = true;
         document.getElementById('video-bitrate').readOnly = true;
         document.getElementById('audio-bitrate').readOnly = true;
-
+        document.getElementById("predicted_filesize").value = ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time;
 
     }
 });
