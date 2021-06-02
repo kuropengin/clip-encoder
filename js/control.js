@@ -78,6 +78,40 @@ bitRate.addEventListener('change', function () {
     }
 });
 
+var elm_do_encode = document.getElementById('do-encode');
+elm_do_encode.addEventListener('change', function () {
+    if (elm_do_encode.value == "true") {
+        document.getElementById('resolution').classList.remove('input-readonly');
+        document.getElementById('framerate').classList.remove('input-readonly');
+        document.getElementById('filesize-area').classList.remove('input-readonly');
+        document.getElementById('filesize').classList.remove('input-readonly');
+        document.getElementById('video-bitrate').classList.remove('input-readonly');
+        document.getElementById('audio-bitrate').classList.remove('input-readonly');
+        document.getElementById('resolution').disabled = false;
+        document.getElementById('framerate').readOnly = false;
+        document.getElementById('filesize-area').readOnly = false;
+        document.getElementById('filesize').readOnly = false;
+        document.getElementById('video-bitrate').readOnly = false;
+        document.getElementById('audio-bitrate').readOnly = false;
+    }
+    else {
+        document.getElementById('resolution').classList.add('input-readonly');
+        document.getElementById('framerate').classList.add('input-readonly');
+        document.getElementById('filesize-area').classList.add('input-readonly');
+        document.getElementById('filesize').classList.add('input-readonly');
+        document.getElementById('video-bitrate').classList.add('input-readonly');
+        document.getElementById('audio-bitrate').classList.add('input-readonly');
+        document.getElementById('resolution').disabled = true;
+        document.getElementById('framerate').readOnly = true;
+        document.getElementById('filesize-area').readOnly = true;
+        document.getElementById('filesize').readOnly = true;
+        document.getElementById('video-bitrate').readOnly = true;
+        document.getElementById('audio-bitrate').readOnly = true;
+
+
+    }
+});
+
 function error_display_on(text) {
     message_text.textContent = text;
     message.classList.remove('display-none');

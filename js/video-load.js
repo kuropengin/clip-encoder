@@ -13,6 +13,7 @@ var video_bitrate = null;
 var audio_bitrate = null;
 var framerate = null;
 var start_encode_time = null;
+var do_encode = true;
 
 
 
@@ -177,9 +178,16 @@ function get_encode_setting() {
     } else {
         resolution = temp;
     }
-
     //フレームレート読み込み
     framerate = parseInt(document.getElementById("framerate").value);
+    //エンコードをするか？
+    temp = document.getElementById("do-encode").value;
+    if (temp == "true") {
+        do_encode = true;
+    } else {
+        do_encode = false;
+    }
+
     console.log(_message);
 }
 
@@ -202,17 +210,30 @@ async function encode() {
         await fetchFile(input_video_file[0])
     );
     start_encode_time = new Date().getTime();
-    await ffmpeg.run(
-        '-ss', "" + start_video_time,
-        '-to', "" + stop_video_time,
-        '-i', input_video_file_name,
-        '-s', resolution,
-        '-b:v', video_bitrate + 'k',
-        '-bufsize', (file_size + 1) + 'M',
-        '-ab', audio_bitrate + 'k',
-        '-vf', 'framerate=' + framerate,
-        'output.mp4'
-    );
+    if (do_encode) {
+        await ffmpeg.run(
+            '-ss', "" + start_video_time,
+            '-to', "" + stop_video_time,
+            '-i', input_video_file_name,
+            '-s', resolution,
+            '-b:v', video_bitrate + 'k',
+            '-bufsize', (file_size + 1) + 'M',
+            '-ab', audio_bitrate + 'k',
+            '-vf', 'framerate=' + framerate,
+            'output.mp4'
+        );
+
+    } else {
+        await ffmpeg.run(
+            '-ss', "" + start_video_time,
+            '-to', "" + stop_video_time,
+            '-i', input_video_file_name,
+            '-vcodec', 'copy',
+            '-acodec', 'copy',
+            'output.mp4'
+        );
+    }
+
     start_encode_time = null;
     console.log('エンコードが完了しました。「エンコード済みの動画」を確認してください');
     const data = ffmpeg.FS('readFile', 'output.mp4');
@@ -228,6 +249,7 @@ async function encode() {
     await sleep(1000);
     next_page();
 }
+
 document.getElementById('uploader').addEventListener('change', load_video);
 document.getElementById('drag-area').addEventListener('drop', drop_load_video);
 document.getElementById('start_time').addEventListener('change', get_encode_setting);
