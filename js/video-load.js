@@ -16,13 +16,15 @@ var start_encode_time = null;
 var do_encode = true;
 
 
+
 async function show_input_video_preview(input_video_file) {
     input_video_preview.src = URL.createObjectURL(
         new Blob(
-            [input_video_file[0]],
+            [input_video_file],
             { type: 'video/mp4' }
         )
     );
+    //console.log(input_video_file.size / (1024 ** 2));
     await sleep(1000);
     input_video_time = input_video_preview.duration;
 
@@ -36,13 +38,13 @@ async function show_input_video_preview(input_video_file) {
 
 
 async function load_video({ target: { files } }) {
-    input_video_file = files;
+    input_video_file = files[0];
     await show_input_video_preview(input_video_file);
 }
 
 
 async function drop_load_video({ dataTransfer: { files } }) {
-    input_video_file = files;
+    input_video_file = files[0];
     await show_input_video_preview(input_video_file);
 }
 
@@ -99,10 +101,10 @@ function calculation_bitrate(file_size, video_time) {
 
 function get_encode_setting() {
 
-    const _start = document.getElementById("start_time").value.split(":");
-    const _stop = document.getElementById("stop_time").value.split(":");
-    start_video_time = parseInt(_start[0] * 60 * 60) + parseInt(_start[1] * 60) + parseFloat(_start[2]);
-    stop_video_time = parseInt(_stop[0] * 60 * 60) + parseInt(_stop[1] * 60) + parseFloat(_stop[2]);
+    const _start = document.getElementById("start_time").value.split(/[:.]/);
+    const _stop = document.getElementById("stop_time").value.split(/[:.]/);
+    start_video_time = parseInt(_start[0]) * 360 + parseInt(_start[1]) * 60 + parseFloat(_start[2]) + parseFloat(_start[3]) / 100;
+    stop_video_time = parseInt(_stop[0]) * 360 + parseInt(_stop[1]) * 60 + parseFloat(_stop[2]) + parseFloat(_stop[3]) / 100;
     output_video_time = stop_video_time - start_video_time;
 
     let _message = "";
@@ -171,7 +173,11 @@ function get_encode_setting() {
         do_encode = false;
     }
 
-    console.log(_message);
+    //エンコード無し時のファイルサイズ計算
+    //console.log("推定ファイルサイズ:", ((input_video_file.size / (1024 ** 2)) / input_video_time) * output_video_time);
+
+
+    //console.log(_message);
 }
 
 
@@ -190,13 +196,15 @@ async function encode() {
     ffmpeg.FS(
         "writeFile",
         input_video_file_name,
-        await fetchFile(input_video_file[0])
+        await fetchFile(input_video_file)
     );
     start_encode_time = new Date().getTime();
+    const _start = document.getElementById("start_time").value;
+    const _stop = document.getElementById("stop_time").value;
     if (do_encode) {
         await ffmpeg.run(
-            '-ss', "" + start_video_time,
-            '-to', "" + stop_video_time,
+            '-ss', "" + _start,
+            '-to', "" + _stop,
             '-i', input_video_file_name,
             '-s', resolution,
             '-b:v', video_bitrate + 'k',
@@ -208,8 +216,8 @@ async function encode() {
 
     } else {
         await ffmpeg.run(
-            '-ss', "" + start_video_time,
-            '-to', "" + stop_video_time,
+            '-ss', "" + _start,
+            '-to', "" + _stop,
             '-i', input_video_file_name,
             '-vcodec', 'copy',
             '-acodec', 'copy',
@@ -225,7 +233,7 @@ async function encode() {
     output_video_preview.src = url;
     var a = document.getElementById('a_download');
     a.href = url;
-    a.download = "(エンコード済み)" + input_video_file[0].name;
+    a.download = "(エンコード済み)" + input_video_file.name;
     ffmpeg.FS("unlink", input_video_file_name);
     ffmpeg.FS("unlink", "output.mp4");
 
