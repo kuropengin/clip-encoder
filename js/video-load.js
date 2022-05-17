@@ -256,7 +256,7 @@ async function encode() {
             '-b:v', video_bitrate + 'k',
             '-bufsize', (file_size + 1) + 'M',
             '-ab', audio_bitrate + 'k',
-            '-vf', 'framerate=' + framerate,
+            '-vf', 'framerate=' + framerate + ',scale=-2:' + resolution.split('x')[1] + ':flags=lanczos+accurate_rnd',
             'output.mp4'
         );
 
